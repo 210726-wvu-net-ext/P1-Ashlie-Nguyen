@@ -1,4 +1,4 @@
-﻿@model P1.Data.Models.Location
+﻿@model P1.ViewModels.LocationViewModel
 
 @{
     ViewData["Title"] = "Create";
@@ -13,9 +13,9 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Store" class="control-label"></label>
-                <input asp-for="Store" class="form-control" />
-                <span asp-validation-for="Store" class="text-danger"></span>
+                <label asp-for="StoreName" class="control-label"></label>
+                <input asp-for="StoreName" class="form-control" />
+                <span asp-validation-for="StoreName" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="StreetAddress" class="control-label"></label>
@@ -36,6 +36,11 @@
                 <label asp-for="Hours" class="control-label"></label>
                 <input asp-for="Hours" class="form-control" />
                 <span asp-validation-for="Hours" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Phone" class="control-label"></label>
+                <input asp-for="Phone" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="OpeningDate" class="control-label"></label>

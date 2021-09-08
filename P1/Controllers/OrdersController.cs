@@ -5,35 +5,55 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using P1.Data.Models;
+using P1.Domain;
+using P1.ViewModels;
 
 namespace P1.Controllers
 {
     public class OrdersController : Controller
     {
-        private readonly P1Context _context;
+        private readonly IOrderRepository _orderrepository;
+        private readonly ICustomerRepository _customerrepository;
+        private readonly ILocationRepository _locationrepository;
 
-        public OrdersController(P1Context context)
+        public OrdersController(IOrderRepository orderrepository, ICustomerRepository customerrepository, ILocationRepository locationrepository)
         {
-            _context = context;
+            _orderrepository = orderrepository;
+            _customerrepository = customerrepository;
+            _locationrepository = locationrepository;
         }
 
         // GET: Orders
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Order.ToListAsync());
+            var order = _orderrepository.GetAll()
+                .Select(o => new Order()
+                {
+                    Id = o.Id,
+                    OrderDate = o.OrderDate,
+                    TotalPrice = o.TotalPrice,
+                    Customer = o.Customer,
+                    Location = o.Location,
+                    CustomerNavigation = _customerrepository.Get(o.Customer),
+                    LocationNavigation = _locationrepository.Get(o.Location)
+                })
+                .OrderByDescending(o => o.CustomerNavigation.FullName)
+                .OrderByDescending(o => o.OrderDate);
+            return View(order);
         }
 
         // GET: Orders/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var order = await _context.Order
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var order = _orderrepository.Get(id);
+            order.CustomerNavigation = _customerrepository.Get(order.Customer);
+            order.LocationNavigation = _locationrepository.Get(order.Location);
+
             if (order == null)
             {
                 return NotFound();
@@ -45,7 +65,23 @@ namespace P1.Controllers
         // GET: Orders/Create
         public IActionResult Create()
         {
-            return View();
+            // SelectItemList is a special ASP.net method for use in displaying drop down lists. Thank you StackOverflow!
+            var vm = new OrderViewModel();
+            vm.Customers = _customerrepository.GetAll()
+                                .Select(a => new SelectListItem()
+                                {
+                                     Value = a.Id.ToString(),
+                                     Text = a.FullName
+                                })
+                                .ToList();
+            vm.Locations = _locationrepository.GetAll()
+                                .Select(a => new SelectListItem()
+                                {
+                                    Value = a.Id.ToString(),
+                                    Text = a.StoreName
+                                })
+                                .ToList();
+            return View(vm);
         }
 
         // POST: Orders/Create
@@ -53,31 +89,63 @@ namespace P1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,OrderDate,TotalPrice")] Order order)
+        public IActionResult Create(OrderViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(order);
-                await _context.SaveChangesAsync();
+                var order = new Order()
+                {
+                    OrderDate = viewModel.OrderDate,
+                    TotalPrice = viewModel.TotalPrice,
+                    Customer = viewModel.Customer,
+                    Location = viewModel.Location,
+                    CustomerNavigation = _customerrepository.Get(viewModel.Customer),
+                    LocationNavigation = _locationrepository.Get(viewModel.Location)
+                };
+                _orderrepository.Create(order);
                 return RedirectToAction(nameof(Index));
             }
-            return View(order);
+            return View(viewModel);
         }
 
         // GET: Orders/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var order = await _context.Order.FindAsync(id);
+            var order = _orderrepository.Get(id);
             if (order == null)
             {
                 return NotFound();
             }
-            return View(order);
+
+            var o = new OrderViewModel()
+            {
+                Id = order.Id,
+                OrderDate = order.OrderDate,
+                TotalPrice = order.TotalPrice,
+                Customer = order.Customer,
+                Location = order.Location
+            };
+
+            o.Customers = _customerrepository.GetAll()
+                                .Select(a => new SelectListItem()
+                                {
+                                    Value = a.Id.ToString(),
+                                    Text = a.FullName
+                                })
+                                .ToList();
+            o.Locations = _locationrepository.GetAll()
+                                .Select(a => new SelectListItem()
+                                {
+                                    Value = a.Id.ToString(),
+                                    Text = a.StoreName
+                                })
+                                .ToList();
+            return View(o);
         }
 
         // POST: Orders/Edit/5
@@ -85,9 +153,9 @@ namespace P1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,OrderDate,TotalPrice")] Order order)
+        public IActionResult Edit(OrderViewModel viewModel)
         {
-            if (id != order.Id)
+            if (viewModel.Id == 0)
             {
                 return NotFound();
             }
@@ -96,12 +164,21 @@ namespace P1.Controllers
             {
                 try
                 {
-                    _context.Update(order);
-                    await _context.SaveChangesAsync();
+                    var order = new Order()
+                    {
+                        Id = viewModel.Id,
+                        OrderDate = viewModel.OrderDate, 
+                        TotalPrice = viewModel.TotalPrice, 
+                        Customer = viewModel.Customer, 
+                        Location = viewModel.Location,
+                        CustomerNavigation = _customerrepository.Get(viewModel.Customer),
+                        LocationNavigation = _locationrepository.Get(viewModel.Location)
+                    };
+                    _orderrepository.Update(order);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!OrderExists(order.Id))
+                    if (!OrderExists(viewModel.Id))
                     {
                         return NotFound();
                     }
@@ -112,19 +189,18 @@ namespace P1.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(order);
+            return View(viewModel);
         }
 
         // GET: Orders/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var order = await _context.Order
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var order = _orderrepository.Get(id);
             if (order == null)
             {
                 return NotFound();
@@ -136,17 +212,31 @@ namespace P1.Controllers
         // POST: Orders/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var order = await _context.Order.FindAsync(id);
-            _context.Order.Remove(order);
-            await _context.SaveChangesAsync();
+            _orderrepository.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool OrderExists(int id)
         {
-            return _context.Order.Any(e => e.Id == id);
+            return _orderrepository.Get(id) != null ? false : true;
+        }
+
+        // GET: Orders/History/5
+        public IActionResult History(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var order = _orderrepository.Get(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            return View(order);
         }
     }
 }

@@ -15,11 +15,12 @@ namespace P1.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.9")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("P1.Data.Models.Customer", b =>
+            modelBuilder.Entity("P1.Data.Models.CustomerEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -29,25 +30,29 @@ namespace P1.Data.Migrations
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
 
-                    b.Property<DateTime>("RegistrationDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<DateTime?>("RegistrationDate")
+                        .HasColumnType("date");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
-
-                    b.ToTable("Customer");
+                    b.ToTable("Customers");
                 });
 
-            modelBuilder.Entity("P1.Data.Models.Location", b =>
+            modelBuilder.Entity("P1.Data.Models.LocationEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -55,82 +60,76 @@ namespace P1.Data.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Hours")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)");
 
-                    b.Property<DateTime>("OpeningDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("OpeningDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("State")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)");
 
-                    b.Property<string>("Store")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("StoreName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("StreetAddress")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("ZipCode")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(10)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Location");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Hours = "7am-midnight",
-                            OpeningDate = new DateTime(2021, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            State = "VA",
-                            Store = "Best Buy - Pentagon city",
-                            StreetAddress = "#1 Pentagon City",
-                            ZipCode = "22206"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Hours = "7am-midnight",
-                            OpeningDate = new DateTime(2021, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            State = "VA",
-                            Store = "Best Buy - Potomac Yards",
-                            StreetAddress = "#1 Potomac Yards",
-                            ZipCode = "22206"
-                        });
+                    b.ToTable("Locations");
                 });
 
-            modelBuilder.Entity("P1.Data.Models.Order", b =>
+            modelBuilder.Entity("P1.Data.Models.OrderEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("CustomerId")
+                    b.Property<int>("Customer")
                         .HasColumnType("int");
 
-                    b.Property<int?>("LocationId")
+                    b.Property<int>("Location")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("OrderDate")
+                        .HasColumnType("date");
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(5,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("Customer");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
+                    b.HasIndex("Location");
 
-                    b.HasIndex("LocationId");
-
-                    b.ToTable("Order");
+                    b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("P1.Data.Models.Product", b =>
+            modelBuilder.Entity("P1.Data.Models.ProductEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -138,26 +137,29 @@ namespace P1.Data.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Category")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(5,2)");
 
-                    b.Property<DateTime>("ReleaseDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("ReleaseDate")
+                        .HasColumnType("date");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
-
-                    b.ToTable("Product");
+                    b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("P1.Data.Models.ProductOrder", b =>
+            modelBuilder.Entity("P1.Data.Models.ProductOrderEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -167,70 +169,75 @@ namespace P1.Data.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OrderId")
+                    b.Property<int>("Order")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ProductId")
+                    b.Property<int>("Product")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
+                    b.HasIndex("Order");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("Product");
 
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductOrder");
+                    b.ToTable("ProductOrders");
                 });
 
-            modelBuilder.Entity("P1.Data.Models.Order", b =>
+            modelBuilder.Entity("P1.Data.Models.OrderEntity", b =>
                 {
-                    b.HasOne("P1.Data.Models.Customer", "Customer")
+                    b.HasOne("P1.Data.Models.CustomerEntity", "CustomerNavigation")
                         .WithMany("Orders")
-                        .HasForeignKey("CustomerId");
+                        .HasForeignKey("Customer")
+                        .HasConstraintName("FK__Order__Customer__1BC821DD")
+                        .IsRequired();
 
-                    b.HasOne("P1.Data.Models.Location", "Location")
+                    b.HasOne("P1.Data.Models.LocationEntity", "LocationNavigation")
                         .WithMany("Orders")
-                        .HasForeignKey("LocationId");
+                        .HasForeignKey("Location")
+                        .HasConstraintName("FK__Order__Location__1CBC4616")
+                        .IsRequired();
 
-                    b.Navigation("Customer");
+                    b.Navigation("CustomerNavigation");
 
-                    b.Navigation("Location");
+                    b.Navigation("LocationNavigation");
                 });
 
-            modelBuilder.Entity("P1.Data.Models.ProductOrder", b =>
+            modelBuilder.Entity("P1.Data.Models.ProductOrderEntity", b =>
                 {
-                    b.HasOne("P1.Data.Models.Order", "Order")
+                    b.HasOne("P1.Data.Models.OrderEntity", "OrderNavigation")
                         .WithMany("ProductOrders")
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("Order")
+                        .HasConstraintName("FK__ProductOr__Order__22751F6C")
+                        .IsRequired();
 
-                    b.HasOne("P1.Data.Models.Product", "Product")
+                    b.HasOne("P1.Data.Models.ProductEntity", "ProductNavigation")
                         .WithMany("ProductOrders")
-                        .HasForeignKey("ProductId");
+                        .HasForeignKey("Product")
+                        .HasConstraintName("FK__ProductOr__Produ__2180FB33")
+                        .IsRequired();
 
-                    b.Navigation("Order");
+                    b.Navigation("OrderNavigation");
 
-                    b.Navigation("Product");
+                    b.Navigation("ProductNavigation");
                 });
 
-            modelBuilder.Entity("P1.Data.Models.Customer", b =>
+            modelBuilder.Entity("P1.Data.Models.CustomerEntity", b =>
                 {
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("P1.Data.Models.Location", b =>
+            modelBuilder.Entity("P1.Data.Models.LocationEntity", b =>
                 {
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("P1.Data.Models.Order", b =>
+            modelBuilder.Entity("P1.Data.Models.OrderEntity", b =>
                 {
                     b.Navigation("ProductOrders");
                 });
 
-            modelBuilder.Entity("P1.Data.Models.Product", b =>
+            modelBuilder.Entity("P1.Data.Models.ProductEntity", b =>
                 {
                     b.Navigation("ProductOrders");
                 });

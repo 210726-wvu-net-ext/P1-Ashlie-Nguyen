@@ -9,7 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using P1.Data;
 using P1.Data.Models;
+using P1.Domain;
 
 namespace P1
 {
@@ -30,6 +32,13 @@ namespace P1
             // teach ASP.NET Core about the dbcontext (so one can be created for each thing that needs it)
             services.AddDbContext<P1Context>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("P1Context")));
+
+            // "if anyone asks for an IRepository, construct a Repository"
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<ILocationRepository, LocationRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IProductOrderRepository, ProductOrderRepository>();
 
             services.AddSession(option =>
             {
@@ -68,7 +77,7 @@ namespace P1
 
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Customers}/{action=Index}/{id?}");
             });
         }
     }

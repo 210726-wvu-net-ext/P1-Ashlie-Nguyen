@@ -1,0 +1,44 @@
+﻿@model IEnumerable<P1.Domain.Order>
+
+@{
+    ViewData["Title"] = "Customer Order History";
+}
+
+<h1>Customer Order History</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LocationNavigation.StoreName)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.OrderDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TotalPrice)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LocationNavigation.StoreName)
+            </td>
+            <td>
+                <a asp-controller="Orders" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-controller="Orders" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-controller="Orders" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

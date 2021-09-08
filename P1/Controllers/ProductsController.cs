@@ -5,35 +5,35 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using P1.Data.Models;
+using P1.Domain;
+using P1.ViewModels;
 
 namespace P1.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly P1Context _context;
+        private readonly IProductRepository _productrepository;
 
-        public ProductsController(P1Context context)
+        public ProductsController(IProductRepository context)
         {
-            _context = context;
+            _productrepository = context;
         }
 
         // GET: Products
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Product.ToListAsync());
+            return View(_productrepository.GetAll());
         }
 
         // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Product
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = _productrepository.Get(id);
             if (product == null)
             {
                 return NotFound();
@@ -53,26 +53,26 @@ namespace P1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,ReleaseDate,Category,Price")] Product product)
+        public IActionResult Create(ProductViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                var product = new Product(viewModel.Name, viewModel.Category, viewModel.ReleaseDate, viewModel.Price);
+                _productrepository.Create(product);
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+            return View(viewModel);
         }
 
         // GET: Products/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Product.FindAsync(id);
+            var product = _productrepository.Get(id);
             if (product == null)
             {
                 return NotFound();
@@ -85,9 +85,9 @@ namespace P1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,ReleaseDate,Category,Price")] Product product)
+        public IActionResult Edit(ProductViewModel viewModel)
         {
-            if (id != product.Id)
+            if (viewModel.Id == 0)
             {
                 return NotFound();
             }
@@ -96,12 +96,12 @@ namespace P1.Controllers
             {
                 try
                 {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
+                    var product = new Product(viewModel.Id, viewModel.Name, viewModel.Category, viewModel.ReleaseDate, viewModel.Price);
+                    _productrepository.Update(product);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.Id))
+                    if (!ProductExists(viewModel.Id))
                     {
                         return NotFound();
                     }
@@ -112,19 +112,18 @@ namespace P1.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+            return View(viewModel);
         }
 
         // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Product
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = _productrepository.Get(id);
             if (product == null)
             {
                 return NotFound();
@@ -136,17 +135,30 @@ namespace P1.Controllers
         // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var product = await _context.Product.FindAsync(id);
-            _context.Product.Remove(product);
-            await _context.SaveChangesAsync();
+            _productrepository.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProductExists(int id)
         {
-            return _context.Product.Any(e => e.Id == id);
+            return _productrepository.Get(id) != null ? true : false;
+        }
+        // GET: Products/History/5
+        public IActionResult History(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = _productrepository.Get(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return View(product);
         }
     }
 }

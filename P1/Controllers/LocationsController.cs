@@ -5,35 +5,35 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using P1.Data.Models;
+using P1.Domain;
+using P1.ViewModels;
 
 namespace P1.Controllers
 {
     public class LocationsController : Controller
     {
-        private readonly P1Context _context;
+        private readonly ILocationRepository _locationrepository;
 
-        public LocationsController(P1Context context)
+        public LocationsController(ILocationRepository locationrepository)
         {
-            _context = context;
+            _locationrepository = locationrepository;
         }
 
         // GET: Locations
-        public async Task<IActionResult> Index()
+        public ActionResult Index()
         {
-            return View(await _context.Location.ToListAsync());
+            return View( _locationrepository.GetAll().ToList());
         }
 
         // GET: Locations/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var location = await _context.Location
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var location =  _locationrepository.Get(id);
             if (location == null)
             {
                 return NotFound();
@@ -53,31 +53,43 @@ namespace P1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Store,StreetAddress,ZipCode,State,Hours,OpeningDate")] Location location)
+        public IActionResult Create(LocationViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(location);
-                await _context.SaveChangesAsync();
+                var location = new Location(viewModel.StoreName,viewModel.Phone,viewModel.Hours,viewModel.StreetAddress,viewModel.ZipCode,viewModel.State,viewModel.OpeningDate);
+                _locationrepository.Create(location);
                 return RedirectToAction(nameof(Index));
             }
-            return View(location);
+            return View(viewModel);
         }
 
         // GET: Locations/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public ActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var location = await _context.Location.FindAsync(id);
+            var location = _locationrepository.Get(id);
             if (location == null)
             {
                 return NotFound();
             }
-            return View(location);
+
+            var l = new LocationViewModel()
+            {
+                Id = location.Id,
+                StoreName = location.StoreName,
+                Phone = location.Phone,
+                Hours = location.Hours,
+                StreetAddress = location.StreetAddress,
+                ZipCode = location.ZipCode,
+                State = location.State,
+                OpeningDate = location.OpeningDate
+            };
+            return View(l);
         }
 
         // POST: Locations/Edit/5
@@ -85,23 +97,18 @@ namespace P1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Store,StreetAddress,ZipCode,State,Hours,OpeningDate")] Location location)
+        public IActionResult Edit(LocationViewModel viewModel)
         {
-            if (id != location.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(location);
-                    await _context.SaveChangesAsync();
+                    var location = new Location(viewModel.Id, viewModel.StoreName, viewModel.Phone, viewModel.Hours, viewModel.StreetAddress, viewModel.ZipCode, viewModel.State, viewModel.OpeningDate);
+                    _locationrepository.Update(location);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!LocationExists(location.Id))
+                    if (!LocationExists(viewModel.Id))
                     {
                         return NotFound();
                     }
@@ -112,19 +119,18 @@ namespace P1.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(location);
+            return View(viewModel);
         }
 
         // GET: Locations/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var location = await _context.Location
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var location = _locationrepository.Get(id);
             if (location == null)
             {
                 return NotFound();
@@ -136,17 +142,31 @@ namespace P1.Controllers
         // POST: Locations/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var location = await _context.Location.FindAsync(id);
-            _context.Location.Remove(location);
-            await _context.SaveChangesAsync();
+            _locationrepository.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool LocationExists(int id)
         {
-            return _context.Location.Any(e => e.Id == id);
+            return _locationrepository.Get(id) != null ? true : false;
+        }
+
+        // GET: Locations/History/5
+        public IActionResult History(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var location = _locationrepository.Get(id);
+            if (location == null)
+            {
+                return NotFound();
+            }
+            return View(location);
         }
     }
 }

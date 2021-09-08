@@ -5,35 +5,35 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using P1.Data.Models;
+using P1.Domain;
+using P1.ViewModels;
 
 namespace P1.Controllers
 {
     public class ProductOrdersController : Controller
     {
-        private readonly P1Context _context;
+        private readonly IProductOrderRepository _porepo;
 
-        public ProductOrdersController(P1Context context)
+        public ProductOrdersController(IProductOrderRepository porepo)
         {
-            _context = context;
+            _porepo = porepo;
         }
 
         // GET: ProductOrders
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.ProductOrder.ToListAsync());
+            return View(_porepo.GetAll());
         }
 
         // GET: ProductOrders/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var productOrder = await _context.ProductOrder
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var productOrder = _porepo.Get(id);
             if (productOrder == null)
             {
                 return NotFound();
@@ -53,26 +53,26 @@ namespace P1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Number")] ProductOrder productOrder)
+        public IActionResult Create(ProductOrderViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(productOrder);
-                await _context.SaveChangesAsync();
+                var productOrder = new ProductOrder(viewModel.Number, viewModel.Product, viewModel.Order);
+                _porepo.Create(productOrder);
                 return RedirectToAction(nameof(Index));
             }
-            return View(productOrder);
+            return View(viewModel);
         }
 
         // GET: ProductOrders/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var productOrder = await _context.ProductOrder.FindAsync(id);
+            var productOrder = _porepo.Get(id);
             if (productOrder == null)
             {
                 return NotFound();
@@ -85,9 +85,9 @@ namespace P1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Number")] ProductOrder productOrder)
+        public IActionResult Edit(ProductOrderViewModel viewModel)
         {
-            if (id != productOrder.Id)
+            if (viewModel.Id == 0)
             {
                 return NotFound();
             }
@@ -96,12 +96,12 @@ namespace P1.Controllers
             {
                 try
                 {
-                    _context.Update(productOrder);
-                    await _context.SaveChangesAsync();
+                    var productOrder = new ProductOrder(viewModel.Id, viewModel.Number, viewModel.Product, viewModel.Order);
+                    _porepo.Update(productOrder);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductOrderExists(productOrder.Id))
+                    if (!ProductOrderExists(viewModel.Id))
                     {
                         return NotFound();
                     }
@@ -112,19 +112,18 @@ namespace P1.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(productOrder);
+            return View(viewModel);
         }
 
         // GET: ProductOrders/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var productOrder = await _context.ProductOrder
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var productOrder = _porepo.Get(id);
             if (productOrder == null)
             {
                 return NotFound();
@@ -136,17 +135,30 @@ namespace P1.Controllers
         // POST: ProductOrders/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var productOrder = await _context.ProductOrder.FindAsync(id);
-            _context.ProductOrder.Remove(productOrder);
-            await _context.SaveChangesAsync();
+            _porepo.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProductOrderExists(int id)
         {
-            return _context.ProductOrder.Any(e => e.Id == id);
+            return _porepo.Get(id) != null ? true : false;
+        }
+        // GET: ProjectOrders/History/5
+        public IActionResult History(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var po = _porepo.Get(id);
+            if (po == null)
+            {
+                return NotFound();
+            }
+            return View(po);
         }
     }
 }

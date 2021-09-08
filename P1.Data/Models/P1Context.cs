@@ -1,103 +1,148 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+
+#nullable disable
 
 namespace P1.Data.Models
 {
-    public class P1Context : DbContext
+    public partial class P1Context : DbContext
     {
+        public P1Context()
+        {
+        }
+
         public P1Context(DbContextOptions<P1Context> options)
             : base(options)
         {
         }
 
-        // dbsets for my tables
-        // (if there's some dbset you won't use directly, you can leave it out here)
-        public DbSet<Customer> Customer { get; set; }
-        public DbSet<Location> Location { get; set; }
-        public DbSet<Order> Order { get; set; }
-        public DbSet<Product> Product { get; set; }
-        public DbSet<ProductOrder> ProductOrder { get; set; }
+        public virtual DbSet<CustomerEntity> Customers { get; set; }
+        public virtual DbSet<LocationEntity> Locations { get; set; }
+        public virtual DbSet<OrderEntity> Orders { get; set; }
+        public virtual DbSet<ProductEntity> Products { get; set; }
+        public virtual DbSet<ProductOrderEntity> ProductOrders { get; set; }
 
-        // onmodelcreating override
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // add any non-default configuration of the model
+            modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
-            modelBuilder.Entity<Customer>(entity =>
+            modelBuilder.Entity<CustomerEntity>(entity =>
             {
-                entity.ToTable("Customer");
-
-                entity.Property(e => e.Id)
-                    .IsRequired();
-
-                entity.HasIndex(e => e.Id)
-                    .IsUnique();
+                entity.ToTable("Customers");
 
                 entity.Property(e => e.FirstName)
-                    .IsRequired();
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.LastName)
-                    .IsRequired();
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Phone)
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RegistrationDate).HasColumnType("date");
             });
 
-            modelBuilder.Entity<Location>(entity =>
+            modelBuilder.Entity<LocationEntity>(entity =>
             {
-                entity.ToTable("Location");
+                entity.ToTable("Locations");
+
+                entity.Property(e => e.Hours)
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.OpeningDate).HasColumnType("date");
+
+                entity.Property(e => e.Phone)
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.State)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.StoreName)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.StreetAddress)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ZipCode)
+                    .IsRequired()
+                    .HasMaxLength(10)
+                    .IsUnicode(false);
             });
 
-            modelBuilder.Entity<Order>(entity =>
+            modelBuilder.Entity<OrderEntity>(entity =>
             {
-                entity.ToTable("Order");
+                entity.ToTable("Orders");
 
-                entity.Property(e => e.Id)
-                    .IsRequired();
+                entity.Property(e => e.OrderDate).HasColumnType("date");
 
-                entity.HasIndex(e => e.Id)
-                    .IsUnique();
+                entity.Property(e => e.TotalPrice).HasColumnType("decimal(5, 2)");
 
-                entity.Property(e => e.TotalPrice)
-                    .HasColumnType("decimal(5,2)");
+                entity.HasOne(d => d.CustomerNavigation)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.Customer)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Order__Customer__1BC821DD");
+
+                entity.HasOne(d => d.LocationNavigation)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.Location)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Order__Location__1CBC4616");
             });
 
-            modelBuilder.Entity<Product>(entity =>
+            modelBuilder.Entity<ProductEntity>(entity =>
             {
-                entity.ToTable("Product");
+                entity.ToTable("Products");
 
-                entity.Property(e => e.Id)
-                    .IsRequired();
+                entity.Property(e => e.Category)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
-                entity.HasIndex(e => e.Id)
-                    .IsUnique();
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
-                entity.Property(e => e.Price)
-                    .HasColumnType("decimal(5,2)");
+                entity.Property(e => e.Price).HasColumnType("decimal(5, 2)");
+
+                entity.Property(e => e.ReleaseDate).HasColumnType("date");
             });
 
-            modelBuilder.Entity<ProductOrder>(entity =>
+            modelBuilder.Entity<ProductOrderEntity>(entity =>
             {
-                entity.ToTable("ProductOrder");
+                entity.ToTable("ProductOrders");
 
-                entity.Property(e => e.Id)
-                    .IsRequired();
+                entity.HasOne(d => d.OrderNavigation)
+                    .WithMany(p => p.ProductOrders)
+                    .HasForeignKey(d => d.Order)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__ProductOr__Order__22751F6C");
 
-                entity.HasIndex(e => e.Id)
-                    .IsUnique();
+                entity.HasOne(d => d.ProductNavigation)
+                    .WithMany(p => p.ProductOrders)
+                    .HasForeignKey(d => d.Product)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__ProductOr__Produ__2180FB33");
             });
 
-            // db-first scaffold creates fluent API for relationships, just for clarity
-            // (entity.HasOne().HasMany() etc), but it doesn't actually need to
-            // since conventions will suffice for the defaults.
-            // if you want to set up, e.g., on-delete-cascade, you'll need to
-            // configure it with fluent API (or data annotations), though.
-
-            // with code-first, you can specify initial data ("seed data") for the tables as well, right here
-            // https://docs.microsoft.com/en-us/ef/core/modeling/data-seeding
-
-            modelBuilder.Entity<Location>()
-                .HasData(new Location[]
-                {
-                    new Location { Id = 1, Store = "Best Buy - Pentagon city", StreetAddress = "#1 Pentagon City", State = "VA", Hours = "7am-midnight", OpeningDate = new System.DateTime(2021, 1, 1), ZipCode = "22206" },
-                    new Location { Id = 2, Store = "Best Buy - Potomac Yards", StreetAddress = "#1 Potomac Yards", State = "VA", Hours = "7am-midnight", OpeningDate = new System.DateTime(2021, 1, 1), ZipCode = "22206" }
-                });
+            OnModelCreatingPartial(modelBuilder);
         }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

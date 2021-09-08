@@ -13,9 +13,10 @@ namespace P1.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    FirstName = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    LastName = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    RegistrationDate = table.Column<DateTime>(type: "date", nullable: true),
+                    Phone = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -28,12 +29,13 @@ namespace P1.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Store = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    StreetAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ZipCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    State = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Hours = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OpeningDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    StoreName = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    StreetAddress = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    ZipCode = table.Column<string>(type: "varchar(10)", unicode: false, maxLength: 10, nullable: false),
+                    State = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
+                    OpeningDate = table.Column<DateTime>(type: "date", nullable: true),
+                    Hours = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
+                    Phone = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -46,10 +48,10 @@ namespace P1.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ReleaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Price = table.Column<decimal>(type: "decimal(5,2)", nullable: false)
+                    Name = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    Category = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
+                    ReleaseDate = table.Column<DateTime>(type: "date", nullable: true),
+                    Price = table.Column<decimal>(type: "decimal(5,2)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -62,23 +64,23 @@ namespace P1.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CustomerId = table.Column<int>(type: "int", nullable: true),
-                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TotalPrice = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
-                    LocationId = table.Column<int>(type: "int", nullable: true)
+                    OrderDate = table.Column<DateTime>(type: "date", nullable: true),
+                    TotalPrice = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
+                    Customer = table.Column<int>(type: "int", nullable: false),
+                    Location = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Order", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Order_Customer_CustomerId",
-                        column: x => x.CustomerId,
+                        name: "FK__Order__Customer__1BC821DD",
+                        column: x => x.Customer,
                         principalTable: "Customer",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Order_Location_LocationId",
-                        column: x => x.LocationId,
+                        name: "FK__Order__Location__1CBC4616",
+                        column: x => x.Location,
                         principalTable: "Location",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -91,79 +93,45 @@ namespace P1.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Number = table.Column<int>(type: "int", nullable: false),
-                    OrderId = table.Column<int>(type: "int", nullable: true),
-                    ProductId = table.Column<int>(type: "int", nullable: true)
+                    Product = table.Column<int>(type: "int", nullable: false),
+                    Order = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProductOrder", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProductOrder_Order_OrderId",
-                        column: x => x.OrderId,
+                        name: "FK__ProductOr__Order__22751F6C",
+                        column: x => x.Order,
                         principalTable: "Order",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_ProductOrder_Product_ProductId",
-                        column: x => x.ProductId,
+                        name: "FK__ProductOr__Produ__2180FB33",
+                        column: x => x.Product,
                         principalTable: "Product",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.InsertData(
-                table: "Location",
-                columns: new[] { "Id", "Hours", "OpeningDate", "State", "Store", "StreetAddress", "ZipCode" },
-                values: new object[] { 1, "7am-midnight", new DateTime(2021, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "VA", "Best Buy - Pentagon city", "#1 Pentagon City", "22206" });
-
-            migrationBuilder.InsertData(
-                table: "Location",
-                columns: new[] { "Id", "Hours", "OpeningDate", "State", "Store", "StreetAddress", "ZipCode" },
-                values: new object[] { 2, "7am-midnight", new DateTime(2021, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "VA", "Best Buy - Potomac Yards", "#1 Potomac Yards", "22206" });
-
             migrationBuilder.CreateIndex(
-                name: "IX_Customer_Id",
-                table: "Customer",
-                column: "Id",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Order_CustomerId",
+                name: "IX_Order_Customer",
                 table: "Order",
-                column: "CustomerId");
+                column: "Customer");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Order_Id",
+                name: "IX_Order_Location",
                 table: "Order",
-                column: "Id",
-                unique: true);
+                column: "Location");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Order_LocationId",
-                table: "Order",
-                column: "LocationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Product_Id",
-                table: "Product",
-                column: "Id",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProductOrder_Id",
+                name: "IX_ProductOrder_Order",
                 table: "ProductOrder",
-                column: "Id",
-                unique: true);
+                column: "Order");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductOrder_OrderId",
+                name: "IX_ProductOrder_Product",
                 table: "ProductOrder",
-                column: "OrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProductOrder_ProductId",
-                table: "ProductOrder",
-                column: "ProductId");
+                column: "Product");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
