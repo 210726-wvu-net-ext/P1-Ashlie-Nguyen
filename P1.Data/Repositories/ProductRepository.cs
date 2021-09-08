@@ -36,7 +36,14 @@ namespace P1.Data
             var entities = _context.Products.ToList();
 
             // map to domain model
-            return entities.Select(e => new Product(e.Id, e.Name, e.Category, e.ReleaseDate, e.Price));
+            return entities.Select(e => new Product() 
+            { 
+                Id = e.Id,
+                Name = e.Name,
+                Category = e.Category,
+                ReleaseDate = e.ReleaseDate,
+                Price = e.Price 
+            });
         }
 
         public Product? Get(int? id)
@@ -49,13 +56,27 @@ namespace P1.Data
             if (e == null)
                 return null;
             else
-                return new Product(e.Id, e.Name, e.Category, e.ReleaseDate, e.Price);
+                return new Product()
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    Category = e.Category,
+                    ReleaseDate = e.ReleaseDate,
+                    Price = e.Price
+                };
         }
 
         public void Create(Product product)
         {
             // map to EF model
-            var entity = new ProductEntity { Id = product.Id, Name = product.Name, Category = product.Category, ReleaseDate = product.ReleaseDate, Price = product.Price };
+            var entity = new ProductEntity 
+            { 
+                Id = product.Id, 
+                Name = product.Name, 
+                Category = product.Category, 
+                ReleaseDate = product.ReleaseDate, 
+                Price = product.Price 
+            };
 
             _context.Products.Add(entity);
 

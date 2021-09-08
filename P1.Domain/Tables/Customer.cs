@@ -6,24 +6,7 @@ namespace P1.Domain
 {
     public class Customer
     {
-        private string _fullname;
-        public Customer(string firstname, string lastname, string phone, DateTime? registrationdate)
-        {
-            FirstName = firstname;
-            LastName = lastname;
-            _fullname = firstname + " " + lastname;
-            RegistrationDate = registrationdate;
-            Phone = phone;
-        }
-        public Customer(int id, string firstname, string lastname, string phone, DateTime? registrationdate)
-        {
-            Id = id;
-            FirstName = firstname;
-            LastName = lastname;
-            _fullname = firstname + " " + lastname;
-            RegistrationDate = registrationdate;
-            Phone = phone;
-        }
+        public Customer() { }
         public int Id { get; set; }
         [Display(Name = "First Name")]
         public string FirstName { get; set; }
@@ -32,7 +15,7 @@ namespace P1.Domain
         [Display(Name = "Customer Name")]
         public string FullName
         {
-            get => _fullname;
+            get => FirstName + " " + LastName;
         }
 
         [DataType(DataType.PhoneNumber)]

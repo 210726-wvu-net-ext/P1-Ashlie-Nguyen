@@ -72,7 +72,14 @@ namespace P1.Controllers
         {
             if (ModelState.IsValid)
             {
-                var customer = new Customer(viewModel.FirstName, viewModel.LastName, viewModel.Phone, viewModel.RegistrationDate);
+                var customer = new Customer()
+                {
+                    Id = viewModel.Id,
+                    FirstName = viewModel.FirstName,
+                    LastName = viewModel.LastName,
+                    Phone = viewModel.Phone,
+                    RegistrationDate = viewModel.RegistrationDate
+                };
                 _customerrepository.Create(customer);
                 //await _customerrepository.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -115,7 +122,14 @@ namespace P1.Controllers
             {
                 try
                 {
-                    var customer = new Customer(viewModel.Id, viewModel.FirstName, viewModel.LastName, viewModel.Phone, viewModel.RegistrationDate);
+                    var customer = new Customer()
+                    {
+                        Id = viewModel.Id,
+                        FirstName = viewModel.FirstName,
+                        LastName = viewModel.LastName,
+                        Phone = viewModel.Phone,
+                        RegistrationDate = viewModel.RegistrationDate
+                    };
                     _customerrepository.Update(customer);
                 }
                 catch (DbUpdateConcurrencyException)

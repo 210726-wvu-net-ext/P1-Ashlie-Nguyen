@@ -22,7 +22,8 @@ namespace P1.Controllers
         // GET: Products
         public IActionResult Index()
         {
-            return View(_productrepository.GetAll());
+            return View(_productrepository.GetAll()
+                .OrderByDescending(o => o.ReleaseDate));
         }
 
         // GET: Products/Details/5
@@ -57,7 +58,13 @@ namespace P1.Controllers
         {
             if (ModelState.IsValid)
             {
-                var product = new Product(viewModel.Name, viewModel.Category, viewModel.ReleaseDate, viewModel.Price);
+                var product = new Product()
+                {
+                    Name = viewModel.Name,
+                    Category = viewModel.Category,
+                    Price = viewModel.Price,
+                    ReleaseDate = viewModel.ReleaseDate
+                };
                 _productrepository.Create(product);
                 return RedirectToAction(nameof(Index));
             }
@@ -77,7 +84,16 @@ namespace P1.Controllers
             {
                 return NotFound();
             }
-            return View(product);
+
+            var p = new ProductViewModel()
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Category = product.Category,
+                Price = product.Price,
+                ReleaseDate = product.ReleaseDate
+            };
+            return View(p);
         }
 
         // POST: Products/Edit/5
@@ -96,7 +112,14 @@ namespace P1.Controllers
             {
                 try
                 {
-                    var product = new Product(viewModel.Id, viewModel.Name, viewModel.Category, viewModel.ReleaseDate, viewModel.Price);
+                    var product = new Product()
+                    {
+                        Id = viewModel.Id,
+                        Name = viewModel.Name,
+                        Category = viewModel.Category,
+                        Price = viewModel.Price,
+                        ReleaseDate = viewModel.ReleaseDate
+                    };
                     _productrepository.Update(product);
                 }
                 catch (DbUpdateConcurrencyException)

@@ -6,20 +6,9 @@ namespace P1.Domain
 {
     public class Product
     {
-        public Product(string name, string category, DateTime? releaseate, decimal price)
+        public Product()
         {
-            Name = name;
-            Category = category;
-            ReleaseDate = releaseate;
-            Price = price;
-        }
-        public Product(int id, string name, string category, DateTime? releaseate, decimal price)
-        {
-            Id = id;
-            Name = name;
-            Category = category;
-            ReleaseDate = releaseate;
-            Price = price;
+
         }
         public int Id { get; set; }
         public string Name { get; set; }

@@ -36,7 +36,14 @@ namespace P1.Data
             var entities = _context.Customers;
 
             // map to domain model
-            return entities.Select(e => new Customer(e.Id, e.FirstName, e.LastName, e.Phone, e.RegistrationDate));
+            return entities.Select(e => new Customer()
+            {
+                Id = e.Id,
+                FirstName = e.FirstName,
+                LastName = e.LastName,
+                Phone = e.Phone,
+                RegistrationDate = e.RegistrationDate
+            });
         }
 
         public Customer? Get(int? id)
@@ -49,7 +56,14 @@ namespace P1.Data
             if (e == null)
                 return null;
             else
-                return new Customer(e.Id, e.FirstName, e.LastName, e.Phone, e.RegistrationDate);
+                return new Customer()
+                {
+                    Id = e.Id,
+                    FirstName = e.FirstName,
+                    LastName = e.LastName,
+                    Phone = e.Phone,
+                    RegistrationDate = e.RegistrationDate
+                };
         }
 
         public void Create(Customer customer)

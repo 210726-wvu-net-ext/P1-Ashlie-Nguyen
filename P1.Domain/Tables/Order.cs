@@ -4,23 +4,11 @@ using System.ComponentModel.DataAnnotations;
 namespace P1.Domain
 {
     public class Order
-    {
-        /*
-        private readonly ICustomerRepository _customerrepository;
-        private readonly ILocationRepository _locationrepository;
-
-        public Order(ICustomerRepository customerrepository, ILocationRepository locationrepository)
-        {
-            _customerrepository = customerrepository;
-            _locationrepository = locationrepository;
-        }
-        */
-        
+    {   
         public Order()
         {
 
         }
-
         public int Id { get; set; }
         [Display(Name = "Order Date")]
         [DataType(DataType.Date)]
