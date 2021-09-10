@@ -7,7 +7,8 @@
       "ignored": "true"
     },
     "secrets1": {
-      "type": "secrets"
+      "type": "secrets",
+      "connectionId": "VaultUri"
     },
     "mssql2": {
       "type": "mssql",

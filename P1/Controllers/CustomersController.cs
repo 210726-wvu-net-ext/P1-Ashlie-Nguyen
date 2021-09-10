@@ -14,9 +14,7 @@ namespace P1.Controllers
     public class CustomersController : Controller
     {
         private readonly ICustomerRepository _customerrepository;
-
         private readonly IOrderRepository _orderrepository;
-
         private readonly ILocationRepository _locationrepository;
 
         public CustomersController(ICustomerRepository customerrepository, IOrderRepository orderrepository, ILocationRepository locationrepository)
@@ -42,7 +40,7 @@ namespace P1.Controllers
         // GET: Customers/Details/5
         public IActionResult Details(int? id)
         {
-            if (id == null)
+            if (id == 1)
             {
                 return NotFound();
             }

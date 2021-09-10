@@ -6,26 +6,9 @@ namespace P1.Domain
 {
     public class Location
     {
-        public Location(string storename, string phone, string hours, string address, string zipcode, string state, DateTime? openingdate)
+        public Location()
         {
-            StoreName = storename;
-            Phone = phone;
-            Hours = hours;
-            StreetAddress = address;
-            ZipCode = zipcode;
-            State = state;
-            OpeningDate = openingdate;
-        }
-        public Location(int id, string storename, string phone, string hours, string address, string zipcode, string state, DateTime? openingdate)
-        {
-            Id = id;
-            StoreName = storename;
-            Phone = phone;
-            Hours = hours;
-            StreetAddress = address;
-            ZipCode = zipcode;
-            State = state;
-            OpeningDate = openingdate;
+
         }
         public int Id { get; set; }
         [Display(Name = "Location Name")]

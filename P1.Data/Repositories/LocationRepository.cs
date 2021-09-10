@@ -36,7 +36,17 @@ namespace P1.Data
             var entities = _context.Locations.ToList();
 
             // map to domain model
-            return entities.Select(e => new Location(e.Id, e.StoreName, e.Phone, e.Hours, e.StreetAddress, e.ZipCode, e.State, e.OpeningDate));
+            return entities.Select(e => new Location()
+            {
+                Id = e.Id,
+                StoreName = e.StoreName,
+                Phone = e.Phone,
+                Hours = e.Hours,
+                StreetAddress = e.StreetAddress,
+                ZipCode = e.ZipCode,
+                State = e.State,
+                OpeningDate = e.OpeningDate
+            });
         }
 
         public Location? Get(int? id)
@@ -49,8 +59,17 @@ namespace P1.Data
             if (e == null)
                 return null;
             else
-                return new Location(e.Id, e.StoreName, e.Phone, e.Hours, e.StreetAddress, e.ZipCode, e.State, e.OpeningDate);
-        }
+                return new Location() {
+                    Id = e.Id,
+                    StoreName = e.StoreName,
+                    Phone = e.Phone,
+                    Hours = e.Hours,
+                    StreetAddress = e.StreetAddress,
+                    ZipCode = e.ZipCode,
+                    State = e.State,
+                    OpeningDate = e.OpeningDate
+                };
+            }
 
         public void Create(Location location)
         {

@@ -13,10 +13,14 @@ namespace P1.Controllers
     public class LocationsController : Controller
     {
         private readonly ILocationRepository _locationrepository;
+        private readonly ICustomerRepository _customerrepository;
+        private readonly IOrderRepository _orderrepository;
 
-        public LocationsController(ILocationRepository locationrepository)
+        public LocationsController(ILocationRepository locationrepository, ICustomerRepository customerrepository, IOrderRepository orderrepository)
         {
             _locationrepository = locationrepository;
+            _customerrepository = customerrepository;
+            _orderrepository = orderrepository;
         }
 
         // GET: Locations
@@ -57,7 +61,16 @@ namespace P1.Controllers
         {
             if (ModelState.IsValid)
             {
-                var location = new Location(viewModel.StoreName,viewModel.Phone,viewModel.Hours,viewModel.StreetAddress,viewModel.ZipCode,viewModel.State,viewModel.OpeningDate);
+                var location = new Location() 
+                {
+                    StoreName = viewModel.StoreName,
+                    Phone = viewModel.Phone,
+                    Hours = viewModel.Hours,
+                    StreetAddress = viewModel.StreetAddress,
+                    ZipCode = viewModel.ZipCode,
+                    State = viewModel.State,
+                    OpeningDate = viewModel.OpeningDate
+                };
                 _locationrepository.Create(location);
                 return RedirectToAction(nameof(Index));
             }
@@ -103,7 +116,18 @@ namespace P1.Controllers
             {
                 try
                 {
-                    var location = new Location(viewModel.Id, viewModel.StoreName, viewModel.Phone, viewModel.Hours, viewModel.StreetAddress, viewModel.ZipCode, viewModel.State, viewModel.OpeningDate);
+
+                    var location = new Location()
+                    {
+                        Id = viewModel.Id,
+                        StoreName = viewModel.StoreName,
+                        Phone = viewModel.Phone,
+                        Hours = viewModel.Hours,
+                        StreetAddress = viewModel.StreetAddress,
+                        ZipCode = viewModel.ZipCode,
+                        State = viewModel.State,
+                        OpeningDate = viewModel.OpeningDate
+                    }; 
                     _locationrepository.Update(location);
                 }
                 catch (DbUpdateConcurrencyException)
@@ -161,12 +185,28 @@ namespace P1.Controllers
                 return NotFound();
             }
 
-            var location = _locationrepository.Get(id);
-            if (location == null)
+            IEnumerable<Location> orders = _orderrepository.Get(id);
+
+            if (orders == null)
             {
                 return NotFound();
             }
-            return View(location);
+
+            if (orders.Count(p => p.Location == id) == 0)
+            {
+                return NotFound();
+            }
+
+            orders = orders.Where(p => p.Location == id).Select(o => new Order()
+            {
+                Id = o.Id,
+                OrderDate = o.OrderDate,
+                TotalPrice = o.TotalPrice,
+                Customer = o.Customer,
+                Location = o.Location,
+                CustomerNavigation = _customerrepository.Get(o.Location)
+            });
+            return View(orders);
         }
     }
 }
