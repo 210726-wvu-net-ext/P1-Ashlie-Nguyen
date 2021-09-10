@@ -4,7 +4,13 @@
       "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/ashlienguyen/databases/P1",
       "type": "mssql.azure",
       "connectionId": "ConnectionStrings:P1Context",
-      "secretStore": "LocalSecretsFile"
+      "secretStore": null
+    },
+    "secrets1": {
+      "type": "secrets",
+      "connectionId": "",
+      "suggestion": "true",
+      "ignored": "true"
     }
   }
 }

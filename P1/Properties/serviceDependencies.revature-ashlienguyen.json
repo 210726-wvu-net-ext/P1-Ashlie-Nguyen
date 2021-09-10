@@ -1,16 +1,16 @@
 {
   "dependencies": {
-    "secrets1": {
-      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.KeyVault/vaults/P1vault-AshlieNguyen",
-      "type": "secrets.keyVault",
-      "connectionId": "VaultUri",
-      "secretStore": "AzureAppSettings"
-    },
     "mssql2": {
       "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/ashlienguyen/databases/P1",
       "type": "mssql.azure",
       "connectionId": "ConnectionStrings:P1Context",
       "secretStore": "AzureKeyVault"
+    },
+    "secrets1": {
+      "type": "secrets",
+      "connectionId": "",
+      "suggestion": "true",
+      "ignored": "true"
     }
   }
 }

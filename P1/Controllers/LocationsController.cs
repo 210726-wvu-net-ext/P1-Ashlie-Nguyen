@@ -185,7 +185,7 @@ namespace P1.Controllers
                 return NotFound();
             }
 
-            IEnumerable<Location> orders = _orderrepository.Get(id);
+            IEnumerable<Order> orders = _orderrepository.GetAll();
 
             if (orders == null)
             {
